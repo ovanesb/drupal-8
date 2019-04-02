@@ -1,0 +1,5 @@
+name: Dependency injection
+type: module
+description: Custom module for dependency injection.
+core: 8.x
+package: Ovanes

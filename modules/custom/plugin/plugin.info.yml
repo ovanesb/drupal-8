@@ -1,0 +1,5 @@
+name: Plugin
+type: module
+description: Custom module for plugin.
+core: 8.x
+package: Ovanes

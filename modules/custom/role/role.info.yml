@@ -1,0 +1,5 @@
+name: Role
+type: module
+description: Custom module for role.
+core: 8.x
+package: Ovanes
