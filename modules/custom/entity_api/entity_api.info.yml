@@ -1,0 +1,5 @@
+name: Entity Api
+type: module
+description: 'Custom module for Entity Api'.
+core: 8.x
+package: Ovanes
