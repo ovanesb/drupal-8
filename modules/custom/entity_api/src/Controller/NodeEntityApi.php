@@ -14,6 +14,7 @@ use Drupal\Core\Controller\ControllerBase;
  *  - Update
  *  - Save
  *  - Check
+ *  - Create alias
  *
  * @package Drupal\entity_api\Controller
  */
