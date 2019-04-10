@@ -18,12 +18,12 @@ use Drupal\Core\Controller\ControllerBase;
  *
  * @package Drupal\entity_api\Controller
  */
-class NodeEntityApi extends ControllerBase {
+class EntityApi extends ControllerBase {
 
     /**
      * Check methods.
      */
-    public function NodeCheck() {
+    public function EntityCheck() {
         // Load node storage.
         $entity = $this->entityTypeManager->getStorage('node');
 
@@ -47,7 +47,7 @@ class NodeEntityApi extends ControllerBase {
     /**
      * Load methods.
      */
-    public function NodeLoad() {
+    public function EntityLoad() {
         // Load node storage.
         $entity = $this->entityTypeManager->getStorage('node');
 
@@ -64,7 +64,7 @@ class NodeEntityApi extends ControllerBase {
     /**
      * Get information from an entity/ Entity methods
      */
-    public function NodeGet() {
+    public function EntityGet() {
 
         // Load node storage.
         $entity = $this->entityTypeManager->getStorage('node')->load(1);
@@ -100,7 +100,7 @@ class NodeEntityApi extends ControllerBase {
     /**
      * Delete node.
      */
-    public function NodeCreate() {
+    public function EntityCreate() {
         $entity = $this->entityTypeManager->getStorage('node');
         $entity->create([
             'uuid' => '572d019d-3169-4b19-8380-1eb3faf5e7f8',
@@ -120,7 +120,7 @@ class NodeEntityApi extends ControllerBase {
     /**
      * Delete node.
      */
-    public function NodeDelete() {
+    public function EntityDelete() {
         // Delete a single entity.
         $entity = $this->entityTypeManager->getStorage('node')->load(1);
         $entity->delete();
@@ -136,7 +136,7 @@ class NodeEntityApi extends ControllerBase {
     /**
      * Save node.
      */
-    public function NodeSave() {
+    public function EntitySave() {
         $entity = $this->entityTypeManager->getStorage('node')->load(1);
 
         // To save an entity.
@@ -144,21 +144,9 @@ class NodeEntityApi extends ControllerBase {
     }
 
     /**
-     * Create alias to a node.
-     */
-    public function NodeAliasCreate() {
-        $storage = \Drupal::service('path.alias_storage');
-        $source = '/node/1';
-
-        // Delete if exists. And you want to change it.
-        $storage->delete(['source' => $source, 'language', 'langcode' => 'en']);
-        $storage->save($source, '/my-path', 'en');
-    }
-
-    /**
      * Set field to a node.
      */
-    public function NotSetField() {
+    public function EntitySetField() {
         $entity = $this->entityTypeManager->getStorage('node')->load(1);
 
         // Set title filed.
