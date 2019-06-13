@@ -1,0 +1,5 @@
+name: State Api
+type: module
+description: 'Custom module for State Api'.
+core: 8.x
+package: Ovanes

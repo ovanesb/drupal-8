@@ -1,0 +1,159 @@
+<?php
+
+/**
+ * @file
+ * Contains module related hooks.
+ */
+
+
+use Drupal\paragraphs\Entity\Paragraph;
+use Drupal\nutella_site\Plugin\Block\LanguageBlock;
+use Drupal\Core\Form\FormStateInterface;
+
+
+
+/**
+ * Example one. Apple conditional fields in PARAGRAPHS.
+ *
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function state_api_field_widget_paragraphs_form_alter(&$element, FormStateInterface $form_state, $context) {
+  /** @var \Drupal\field\Entity\FieldConfig $field_definition */
+  $field_definition = $context['items']->getFieldDefinition();
+  $paragraph_entity_reference_field_name = $field_definition->getName();
+
+  // page_paragraph is the filed name
+  if ($paragraph_entity_reference_field_name == 'page_paragraph') {
+    /** @see \Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget::formElement() */
+    $widget_state = \Drupal\Core\Field\WidgetBase::getWidgetState($element['#field_parents'], $paragraph_entity_reference_field_name, $form_state);
+
+    /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph */
+    $paragraph_instance = $widget_state['paragraphs'][$element['#delta']]['entity'];
+    $paragraph_type = $paragraph_instance->bundle();
+
+    // Determine which paragraph type is being embedded.
+    if ($paragraph_type == 'circle_block') {
+      $dependee_field_name = 'template_selector';
+
+      $selector = sprintf('select[name="%s[%d][subform][%s][0][value]"]', $paragraph_entity_reference_field_name, $element['#delta'], $dependee_field_name);
+
+      // Show/hide fields depending on subtype.
+      // Conditional fields don't work with custom template selector field type.
+      $subtypes = [
+        'range' => 'paragraph|paragraph__dynamic__nutella_range',
+        'nutella_breakfast' => 'paragraph|paragraph__dynamic__nutella_nutella_breakfast',
+        'history' => 'paragraph|paragraph__dynamic__nutella_history',
+      ];
+
+      // Dependent fields.
+      $element['subform']['media']['#states'] = [
+        'visible' => [[$selector => ['value' => $subtypes['range']]]],
+      ];
+
+    }
+  }
+}
+
+
+/**
+ * Example two. Apple conditional fields in PARAGRAPHS.
+ *
+ * For this example, let’s assume a content type has a machine name of campaign
+ * with an entity reference field whose machine name is field_sections.
+ * The paragraph where we want to apply the conditional logic has a machine name
+ * of embedded_image_or_video with the following fields: field_image, field_video,
+ * and field_image_or_video. The field_image_or_video field is of
+ * type List (text) with the following values: Image and Video.
+ *
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function state_api_two_field_widget_paragraphs_form_alter(&$element, FormStateInterface $form_state, $context) {
+  /** @var \Drupal\field\Entity\FieldConfig $field_definition */
+  $field_definition = $context['items']->getFieldDefinition();
+  $paragraph_entity_reference_field_name = $field_definition->getName();
+
+  if ($paragraph_entity_reference_field_name == 'field_sections') {
+    /** @see \Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget::formElement() */
+    $widget_state = \Drupal\Core\Field\WidgetBase::getWidgetState($element['#field_parents'], $paragraph_entity_reference_field_name, $form_state);
+
+    /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph */
+    $paragraph_instance = $widget_state['paragraphs'][$element['#delta']]['entity'];
+    $paragraph_type = $paragraph_instance->bundle();
+
+    // Determine which paragraph type is being embedded.
+    if ($paragraph_type == 'embedded_image_or_video') {
+      $dependee_field_name = 'field_image_or_video';
+      $selector = sprintf('select[name="%s[%d][subform][%s]"]', $paragraph_entity_reference_field_name, $element['#delta'], $dependee_field_name);
+
+      // Dependent fields.
+      $element['subform']['field_image']['#states'] = [
+        'visible' => [
+          $selector => ['value' => 'Image'],
+        ],
+      ];
+
+      $element['subform']['field_video']['#states'] = [
+        'visible' => [
+          $selector => ['value' => 'Video'],
+        ],
+      ];
+    }
+  }
+}
+
+
+/**
+ * Apple conditional fields in NODE.
+ */
+function state_api_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  switch ($form_id) {
+    case 'node_my_node_name_form':
+    case 'node_my_node_name_edit_form':
+
+      // Show/hide fields depending on subtype.
+      // Conditional fields don't work with custom template selector field type.
+      $subtypes = [
+        'step' => 'content_type|node__dynamic__step_by_step',
+        'image' => 'content_type|node__dynamic__recipe_with_image',
+        'video' => 'content_type|node__dynamic__recipe_with_video',
+      ];
+      $fld_subtype = 'select[name="template_selector[0][value]"]';
+      $form['field_ingredients']['#states'] = [
+        'visible' => [
+          [$fld_subtype => ['value' => $subtypes['image']]],
+          [$fld_subtype => ['value' => $subtypes['video']]],
+        ],
+      ];
+      $form['field_instructions']['#states'] = [
+        'visible' => [
+          [$fld_subtype => ['value' => $subtypes['image']]],
+          [$fld_subtype => ['value' => $subtypes['video']]],
+        ],
+      ];
+      $form['field_main_image']['#states'] = [
+        'required' => [[$fld_subtype => ['value' => $subtypes['image']]]],
+        'visible' => [[$fld_subtype => ['value' => $subtypes['image']]]],
+      ];
+      $form['field_main_video']['#states'] = [
+        'required' => [[$fld_subtype => ['value' => $subtypes['video']]]],
+        'visible' => [[$fld_subtype => ['value' => $subtypes['video']]]],
+      ];
+      $form['field_steps']['widget']['form']['title'] = [
+        '#weight' => -10,
+        '#markup' => '<h2>' . t('Steps') . '</h2>',
+      ];
+      $form['field_steps']['#states'] = [
+        'required' => [[$fld_subtype => ['value' => $subtypes['step']]]],
+        'visible' => [[$fld_subtype => ['value' => $subtypes['step']]]],
+      ];
+      $form['#validate'][] = '_recipe_item_validate';
+
+      // PDF logic.
+      $form['field_upload_pdf']['#states'] = [
+        'required' => [[':input[name="field_pdf_generate[value]"]' => ['checked' => FALSE]]],
+        'visible' => [[':input[name="field_pdf_generate[value]"]' => ['checked' => FALSE]]],
+      ];
+
+      break;
+  }
+}

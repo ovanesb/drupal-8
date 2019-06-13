@@ -98,7 +98,7 @@ class EntityApi extends ControllerBase {
     }
 
     /**
-     * Delete node.
+     * Create node.
      */
     public function EntityCreate() {
         $entity = $this->entityTypeManager->getStorage('node');
